@@ -2,7 +2,7 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.*;
 
-public class Main {
+public class Lox {
     public static void main(String[] args) throws IOException {
         if (args.length > 1) {
             System.out.println("Usage: jlox [script]");
