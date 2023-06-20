@@ -1,3 +1,5 @@
+package linewelder.lox;
+
 import java.util.*;
 
 class Scanner {
