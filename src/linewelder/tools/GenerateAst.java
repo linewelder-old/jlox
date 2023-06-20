@@ -30,7 +30,35 @@ public class GenerateAst {
             writer.println();
             writer.println("abstract class " + baseName + " {");
 
+            for (final String type : types) {
+                final String className = type.split(":")[0].trim();
+                final String fields = type.split(":")[1].trim();
+                defineType(writer, baseName, className, fields);
+            }
+
             writer.println("}");
         }
+    }
+
+    private static void defineType(
+        PrintWriter writer, String baseName,
+        String className, String fieldList
+    ) {
+        writer.println("    static class " + className + " extends " + baseName + " {");
+
+        final String[] fields = fieldList.split(", ");
+        for (final String field : fields) {
+            writer.println("        final " + field + ";");
+        }
+        writer.println();
+
+        writer.println("        " + className + " (" + fieldList + ") {");
+        for (final String field : fields) {
+            final String name = field.split(" ")[1];
+            writer.println("            this." + name + " = " + name + ";");
+        }
+        writer.println("        }");
+
+        writer.println("    }");
     }
 }
