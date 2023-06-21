@@ -1,6 +1,8 @@
 package linewelder.lox;
 
 import java.util.*;
+import java.util.function.Supplier;
+
 import static linewelder.lox.TokenType.*;
 
 class Parser {
@@ -26,43 +28,26 @@ class Parser {
     }
 
     private Expr equality() {
-        Expr expr = comparison();
-        while (match(BANG_EQUAL, EQUAL_EQUAL)) {
-            final Token operator = previous();
-            final Expr right = comparison();
-            expr = new Expr.Binary(expr, operator, right);
-        }
-
-        return expr;
+        return binary(this::comparison, BANG_EQUAL, EQUAL_EQUAL);
     }
 
     private Expr comparison() {
-        Expr expr = term();
-        while (match(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)) {
-            final Token operator = previous();
-            final Expr right = term();
-            expr = new Expr.Binary(expr, operator, right);
-        }
-
-        return expr;
+        return binary(this::term, GREATER, GREATER_EQUAL, LESS, LESS_EQUAL);
     }
 
     private Expr term() {
-        Expr expr = factor();
-        while (match(MINUS, PLUS)) {
-            final Token operator = previous();
-            final Expr right = factor();
-            expr = new Expr.Binary(expr, operator, right);
-        }
-
-        return expr;
+        return binary(this::factor, MINUS, PLUS);
     }
 
     private Expr factor() {
-        Expr expr = unary();
-        while (match(SLASH, STAR)) {
+        return binary(this::unary, SLASH, STAR);
+    }
+
+    private Expr binary(Supplier<Expr> operand, TokenType... operators) {
+        Expr expr = operand.get();
+        while (match(operators)) {
             final Token operator = previous();
-            final Expr right = unary();
+            final Expr right = operand.get();
             expr = new Expr.Binary(expr, operator, right);
         }
 
