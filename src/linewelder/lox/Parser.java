@@ -4,6 +4,8 @@ import java.util.*;
 import static linewelder.lox.TokenType.*;
 
 class Parser {
+    private static class ParseError extends RuntimeException {}
+
     private final List<Token> tokens;
     private int current = 0;
 
@@ -84,7 +86,7 @@ class Parser {
             return new Expr.Grouping(expr);
         }
 
-        throw new UnsupportedOperationException("Error handling not implemented");
+        throw error(peek(), "Expect expression.");
     }
 
     private boolean match(TokenType... types) {
@@ -100,7 +102,7 @@ class Parser {
 
     private Token consume(TokenType type, String message) {
         if (check(type)) return advance();
-        throw new UnsupportedOperationException("Error handling not implemented");
+        throw error(peek(), message);
     }
 
     private boolean check(TokenType type) {
@@ -123,5 +125,10 @@ class Parser {
 
     private Token previous() {
         return tokens.get(current - 1);
+    }
+
+    private ParseError error(Token token, String message) {
+        Lox.error(token, message);
+        return new ParseError();
     }
 }
