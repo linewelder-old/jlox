@@ -39,9 +39,7 @@ public class GenerateAst {
                 defineType(writer, baseName, className, fields);
             }
 
-            writer.println();
             writer.println("    abstract <R> R accept(Visitor<R> visitor);");
-
             writer.println("}");
         }
     }
@@ -57,7 +55,8 @@ public class GenerateAst {
                 typeName + " " + baseName.toLowerCase() + ");");
         }
 
-        writer.println(" }");
+        writer.println("    }");
+        writer.println();
     }
 
     private static void defineType(
@@ -86,5 +85,6 @@ public class GenerateAst {
         writer.println("        }");
 
         writer.println("    }");
+        writer.println();
     }
 }
