@@ -84,6 +84,16 @@ public class Interpreter implements Expr.Visitor<Object> {
         };
     }
 
+    @Override
+    public Object visitTernaryExpr(Expr.Ternary expr) {
+        final Object condition = evaluate(expr.condition);
+        if (isTruthy(condition)) {
+            return evaluate(expr.ifTrue);
+        } else {
+            return evaluate(expr.ifFalse);
+        }
+    }
+
     private void checkNumberOperand(Token operator, Object operand) {
         if (operand instanceof Double) return;
         throw new RuntimeError(operator, "Operand must be a number.");
