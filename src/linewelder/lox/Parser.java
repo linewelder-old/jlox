@@ -131,4 +131,18 @@ class Parser {
         Lox.error(token, message);
         return new ParseError();
     }
+
+    private void synchronize() {
+        advance();
+        while(!isAtEnd()) {
+            if (previous().type == SEMICOLON) return;
+            switch (peek().type) {
+                case CLASS, FUN, VAR, FOR, IF, WHILE, PRINT, RETURN -> {
+                    return;
+                }
+            }
+
+            advance();
+        }
+    }
 }
