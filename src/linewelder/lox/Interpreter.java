@@ -24,17 +24,7 @@ public class Interpreter implements Expr.Visitor<Object> {
                 checkNumberOperands(expr.operator, left, right);
                 yield (double)left - (double)right;
             }
-            case PLUS -> {
-                if (left instanceof Double && right instanceof Double) {
-                    yield (double)left + (double)right;
-                }
-                if (left instanceof String && right instanceof String){
-                    yield (String)left + (String)right;
-                }
-
-                throw new RuntimeError(expr.operator,
-                    "Operands must be two numbers or two strings.");
-            }
+            case PLUS -> add(expr.operator, left, right);
             case SLASH -> {
                 checkNumberOperands(expr.operator, left, right);
                 yield (double)left / (double)right;
@@ -103,6 +93,21 @@ public class Interpreter implements Expr.Visitor<Object> {
         if (!(right instanceof Double)) {
             throw new RuntimeError(operator, "Right operand must be a number.");
         }
+    }
+
+    private Object add(Token operator, Object left, Object right) {
+        if (left instanceof String) {
+            return (String)left + stringify(right);
+        }
+        if (right instanceof String) {
+            return stringify(left) + (String)right;
+        }
+        if (left instanceof Double && right instanceof Double) {
+            return (double)left + (double)right;
+        }
+
+        throw new RuntimeError(operator,
+            "Operands must be two numbers or one of them must be a string.");
     }
 
     private boolean isTruthy(Object object) {
