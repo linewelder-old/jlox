@@ -42,9 +42,13 @@ public class Lox {
     private static void run(String source) {
         final Scanner scanner = new Scanner(source);
         final List<Token> tokens = scanner.scanTokens();
-        for (final Token token : tokens) {
-            System.out.println(token);
-        }
+
+        final Parser parser = new Parser(tokens);
+        final Expr ast = parser.parse();
+
+        if (hadError) return;
+
+        System.out.println(new AstPrinter().print(ast));
     }
 
     static void error(int line, String message) {
