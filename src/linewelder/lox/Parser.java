@@ -1,0 +1,127 @@
+package linewelder.lox;
+
+import java.util.*;
+import static linewelder.lox.TokenType.*;
+
+class Parser {
+    private final List<Token> tokens;
+    private int current = 0;
+
+    Parser(List<Token> tokens) {
+        this.tokens = tokens;
+    }
+
+    private Expr expression() {
+        return equality();
+    }
+
+    private Expr equality() {
+        Expr expr = comparison();
+        while (match(BANG_EQUAL, EQUAL_EQUAL)) {
+            final Token operator = previous();
+            final Expr right = comparison();
+            expr = new Expr.Binary(expr, operator, right);
+        }
+
+        return expr;
+    }
+
+    private Expr comparison() {
+        Expr expr = term();
+        while (match(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)) {
+            final Token operator = previous();
+            final Expr right = term();
+            expr = new Expr.Binary(expr, operator, right);
+        }
+
+        return expr;
+    }
+
+    private Expr term() {
+        Expr expr = factor();
+        while (match(MINUS, PLUS)) {
+            final Token operator = previous();
+            final Expr right = factor();
+            expr = new Expr.Binary(expr, operator, right);
+        }
+
+        return expr;
+    }
+
+    private Expr factor() {
+        Expr expr = unary();
+        while (match(SLASH, STAR)) {
+            final Token operator = previous();
+            final Expr right = unary();
+            expr = new Expr.Binary(expr, operator, right);
+        }
+
+        return expr;
+    }
+
+    private Expr unary() {
+        if (match(BANG, MINUS)) {
+            final Token operator = previous();
+            final Expr right = unary();
+            return new Expr.Unary(operator, right);
+        }
+
+        return primary();
+    }
+
+    private Expr primary() {
+        if (match(FALSE)) return new Expr.Literal(false);
+        if (match(TRUE)) return new Expr.Literal(true);
+        if (match(NIL)) return new Expr.Literal(null);
+
+        if (match(NUMBER, STRING)) {
+            return new Expr.Literal(previous().literal);
+        }
+
+        if (match(LEFT_PAREN)) {
+            final Expr expr = expression();
+            consume(RIGHT_PAREN, "Expect ')' after expression.");
+            return new Expr.Grouping(expr);
+        }
+
+        throw new UnsupportedOperationException("Error handling not implemented");
+    }
+
+    private boolean match(TokenType... types) {
+        for (final TokenType type : types) {
+            if (check(type)) {
+                advance();
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private Token consume(TokenType type, String message) {
+        if (check(type)) return advance();
+        throw new UnsupportedOperationException("Error handling not implemented");
+    }
+
+    private boolean check(TokenType type) {
+        if (isAtEnd()) return false;
+        return peek().type == type;
+    }
+
+    private Token advance() {
+        if (!isAtEnd()) current++;
+        return previous();
+    }
+
+    private boolean isAtEnd() {
+        return peek().type == TokenType.EOF;
+    }
+
+    private Token peek() {
+        return tokens.get(current);
+    }
+
+    private Token previous() {
+        return tokens.get(current - 1);
+    }
+}
