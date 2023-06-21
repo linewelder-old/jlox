@@ -110,10 +110,10 @@ public class Interpreter implements Expr.Visitor<Object> {
 
     private Object add(Token operator, Object left, Object right) {
         if (left instanceof String) {
-            return (String)left + stringify(right);
+            return left + stringify(right);
         }
         if (right instanceof String) {
-            return stringify(left) + (String)right;
+            return stringify(left) + right;
         }
         if (left instanceof Double && right instanceof Double) {
             return (double)left + (double)right;
