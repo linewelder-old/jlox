@@ -24,7 +24,19 @@ class Parser {
     }
 
     private Expr expression() {
-        return equality();
+        return ternary();
+    }
+
+    private Expr ternary() {
+        final Expr expr = equality();
+        if (match(QUESTION)) {
+            final Expr ifTrue = equality();
+            consume(COLON, "Expect ':' between expressions.");
+            final Expr ifFalse = ternary();
+            return new Expr.Ternary(expr, ifTrue, ifFalse);
+        }
+
+        return expr;
     }
 
     private Expr equality() {
