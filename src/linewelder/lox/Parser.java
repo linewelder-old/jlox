@@ -48,13 +48,11 @@ class Parser {
     }
 
     private Expr term() {
-        Expr expr = null;
-        if (peek().type == PLUS) {
+        if (match(PLUS)) {
             error(peek(), "Lox does not support unary '+'.");
-        } else {
-            expr = factor();
         }
 
+        Expr expr = factor();
         while (match(MINUS, PLUS)) {
             final Token operator = previous();
             final Expr right = factor();
@@ -69,19 +67,11 @@ class Parser {
     }
 
     private Expr binary(Supplier<Expr> operand, TokenType... operators) {
-        boolean noLeftOperand = false;
-        for (final TokenType operator : operators) {
-            if (peek().type == operator) {
-                error(peek(), "Is a binary operation, left operand missing.");
-                noLeftOperand = true;
-            }
+        if (match(operators)) {
+            error(peek(), "Is a binary operation, left operand missing.");
         }
 
-        Expr expr = null;
-        if (!noLeftOperand) {
-            expr = operand.get();
-        }
-
+        Expr expr = operand.get();
         while (match(operators)) {
             final Token operator = previous();
             final Expr right = operand.get();
