@@ -82,7 +82,7 @@ public class GenerateAst {
         }
         writer.println();
 
-        writer.println("        " + className + " (" + fieldList + ") {");
+        writer.println("        " + className + "(" + fieldList + ") {");
         for (final String field : fields) {
             final String name = field.split(" ")[1];
             writer.println("            this." + name + " = " + name + ";");
