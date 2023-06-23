@@ -49,6 +49,7 @@ class Parser {
     private Stmt statement(boolean replPrompt) {
         if (match(IF)) return ifStatement();
         if (match(PRINT)) return printStatement();
+        if (match(WHILE)) return whileStatement();
         if (match(LEFT_BRACE)) return new Stmt.Block(block());
         return expressionStatement(replPrompt);
     }
@@ -71,6 +72,15 @@ class Parser {
         final Expr value = expression();
         consume(SEMICOLON, "Expect ';' after value.");
         return new Stmt.Print(value);
+    }
+
+    private Stmt whileStatement() {
+        consume(LEFT_PAREN, "Expect '(' after 'while'.");
+        final Expr condition = expression();
+        consume(RIGHT_PAREN, "Expect ')' after condition.");
+        final Stmt body = statement(false);
+
+        return new Stmt.While(condition, body);
     }
 
     private Stmt expressionStatement(boolean replPrompt) {
