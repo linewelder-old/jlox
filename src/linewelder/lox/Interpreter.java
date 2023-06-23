@@ -94,6 +94,11 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Void visitReturnStmt(Stmt.Return stmt) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public Void visitVarStmt(Stmt.Var stmt) {
         environment.define(
             stmt.name.lexeme,
