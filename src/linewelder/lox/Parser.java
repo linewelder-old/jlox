@@ -15,19 +15,19 @@ class Parser {
         this.tokens = tokens;
     }
 
-    List<Stmt> parse() {
+    List<Stmt> parse(boolean replPrompt) {
         final List<Stmt> statements = new ArrayList<>();
         while (!isAtEnd()) {
-            statements.add(declaration());
+            statements.add(declaration(replPrompt));
         }
 
         return statements;
     }
 
-    private Stmt declaration() {
+    private Stmt declaration(boolean replPrompt) {
         try {
             if (match(VAR)) return varDeclaration();
-            return statement();
+            return statement(replPrompt);
         } catch (ParseError error) {
             synchronize();
             return null;
@@ -46,10 +46,10 @@ class Parser {
         return new Stmt.Var(name, initializer);
     }
 
-    private Stmt statement() {
+    private Stmt statement(boolean replPrompt) {
         if (match(PRINT)) return printStatement();
         if (match(LEFT_BRACE)) return new Stmt.Block(block());
-        return expressionStatement();
+        return expressionStatement(replPrompt);
     }
 
     private Stmt printStatement() {
@@ -58,16 +58,27 @@ class Parser {
         return new Stmt.Print(value);
     }
 
-    private Stmt expressionStatement() {
+    private Stmt expressionStatement(boolean replPrompt) {
         final Expr expr = expression();
-        consume(SEMICOLON, "Expect ';' after expression.");
-        return new Stmt.Expression(expr);
+        if (match(SEMICOLON)) {
+            return new Stmt.Expression(expr);
+        }
+
+        if (!replPrompt) {
+            throw error(peek(), "Expect ';' after expression.");
+        }
+
+        if (isAtEnd()) {
+            return new Stmt.Print(expr);
+        }
+
+        throw error(peek(), "Unexpected token after expression.");
     }
 
     private List<Stmt> block() {
         final List<Stmt> statements = new ArrayList<>();
         while (!check(RIGHT_BRACE) && !isAtEnd()) {
-            statements.add(declaration());
+            statements.add(declaration(false));
         }
 
         consume(RIGHT_BRACE, "Expect '}' after block.");
