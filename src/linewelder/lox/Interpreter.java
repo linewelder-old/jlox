@@ -1,6 +1,6 @@
 package linewelder.lox;
 
-import java.util.List;
+import java.util.*;
 
 public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     private Environment environment = new Environment();
@@ -139,7 +139,18 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     @Override
     public Object visitCallExpr(Expr.Call expr) {
-        throw new UnsupportedOperationException();
+        final Object callee = evaluate(expr.callee);
+        if (!(callee instanceof LoxCallable function)) {
+            throw new RuntimeError(expr.paren,
+                "Can only call functions and classes.");
+        }
+
+        final List<Object> arguments = new ArrayList<>();
+        for (final Expr argument : expr.arguments) {
+            arguments.add(evaluate(argument));
+        }
+
+        return function.call(this, arguments);
     }
 
     @Override
