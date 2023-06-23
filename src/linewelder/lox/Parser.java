@@ -159,7 +159,11 @@ class Parser {
         return binary(this::unary, SLASH, STAR);
     }
 
-    private Expr binary(Supplier<Expr> operand, TokenType... operators) {
+    private interface BinaryFactory {
+        Expr create(Expr left, Token operator, Expr right);
+    }
+
+    private Expr binary(BinaryFactory factory, Supplier<Expr> operand, TokenType... operators) {
         if (match(operators)) {
             error(previous(), "Is a binary operation, left operand missing.");
         }
@@ -168,10 +172,14 @@ class Parser {
         while (match(operators)) {
             final Token operator = previous();
             final Expr right = operand.get();
-            expr = new Expr.Binary(expr, operator, right);
+            expr = factory.create(expr, operator, right);
         }
 
         return expr;
+    }
+
+    private Expr binary(Supplier<Expr> operand, TokenType... operators) {
+        return binary(Expr.Binary::new, operand, operators);
     }
 
     private Expr unary() {
