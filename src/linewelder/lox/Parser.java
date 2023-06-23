@@ -121,15 +121,23 @@ class Parser {
     }
 
     private Expr ternary() {
-        final Expr expr = equality();
+        final Expr expr = or();
         if (match(QUESTION)) {
-            final Expr ifTrue = equality();
+            final Expr ifTrue = or();
             consume(COLON, "Expect ':' between expressions.");
             final Expr ifFalse = ternary();
             return new Expr.Ternary(expr, ifTrue, ifFalse);
         }
 
         return expr;
+    }
+
+    private Expr or() {
+        return binary(Expr.Logical::new, this::and, OR);
+    }
+
+    private Expr and() {
+        return binary(Expr.Logical::new, this::equality, AND);
     }
 
     private Expr equality() {
