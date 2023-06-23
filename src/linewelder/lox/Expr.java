@@ -1,5 +1,7 @@
 package linewelder.lox;
 
+import java.util.*;
+
 abstract class Expr {
     interface Visitor<R> {
         R visitAssignExpr(Assign expr);

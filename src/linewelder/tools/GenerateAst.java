@@ -23,6 +23,7 @@ public class GenerateAst {
             "Ternary  : Expr condition, Expr ifTrue, Expr ifFalse"
         ));
         defineAst(outputDir, "Stmt", Arrays.asList(
+            "Block      : List<Stmt> statements",
             "Expression : Expr expression",
             "Print      : Expr value",
             "Var        : Token name, Expr initializer"
@@ -35,6 +36,8 @@ public class GenerateAst {
         final Path path = Paths.get(outputDir, baseName + ".java");
         try (PrintWriter writer = new PrintWriter(path.toString(), StandardCharsets.UTF_8)) {
             writer.println("package linewelder.lox;");
+            writer.println();
+            writer.println("import java.util.*;");
             writer.println();
             writer.println("abstract class " + baseName + " {");
 
