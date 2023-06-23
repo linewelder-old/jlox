@@ -51,6 +51,7 @@ class Parser {
     }
 
     private Stmt statement(boolean replPrompt) {
+        if (match(BREAK)) return breakStatement();
         if (match(FOR)) return forStatement();
         if (match(IF)) return ifStatement();
         if (match(PRINT)) return printStatement();
@@ -58,6 +59,13 @@ class Parser {
         if (match(WHILE)) return whileStatement();
         if (match(LEFT_BRACE)) return new Stmt.Block(block());
         return expressionStatement(replPrompt);
+    }
+
+    private Stmt breakStatement() {
+        final Token token = previous();
+        consume(SEMICOLON, "Expect ';' after 'break'.");
+
+        return new Stmt.Break(token);
     }
 
     private Stmt forStatement() {

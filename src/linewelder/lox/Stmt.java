@@ -4,6 +4,7 @@ import java.util.*;
 
 abstract class Stmt {
     interface Visitor<R> {
+        R visitBreakStmt(Break stmt);
         R visitBlockStmt(Block stmt);
         R visitExpressionStmt(Expression stmt);
         R visitFunctionStmt(Function stmt);
@@ -12,6 +13,19 @@ abstract class Stmt {
         R visitReturnStmt(Return stmt);
         R visitVarStmt(Var stmt);
         R visitWhileStmt(While stmt);
+    }
+
+    static class Break extends Stmt {
+        final Token token;
+
+        Break(Token token) {
+            this.token = token;
+        }
+
+        @Override
+        <R> R accept(Visitor<R> visitor) {
+            return visitor.visitBreakStmt(this);
+        }
     }
 
     static class Block extends Stmt {

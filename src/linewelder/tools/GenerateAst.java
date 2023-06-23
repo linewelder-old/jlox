@@ -26,6 +26,7 @@ public class GenerateAst {
             "Ternary  : Expr condition, Expr ifTrue, Expr ifFalse"
         ));
         defineAst(outputDir, "Stmt", Arrays.asList(
+            "Break      : Token token",
             "Block      : List<Stmt> statements",
             "Expression : Expr expression",
             "Function   : Token name, Expr.Function function",
