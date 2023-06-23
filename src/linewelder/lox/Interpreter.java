@@ -69,6 +69,11 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Void visitFunctionStmt(Stmt.Function stmt) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public Void visitIfStmt(Stmt.If stmt) {
         final Object condition = evaluate(stmt.condition);
         if (isTruthy(condition)) {
