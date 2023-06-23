@@ -116,7 +116,7 @@ class Parser {
 
     private Expr term() {
         if (match(PLUS)) {
-            error(peek(), "Lox does not support unary '+'.");
+            error(previous(), "Lox does not support unary '+'.");
         }
 
         Expr expr = factor();
@@ -135,7 +135,7 @@ class Parser {
 
     private Expr binary(Supplier<Expr> operand, TokenType... operators) {
         if (match(operators)) {
-            error(peek(), "Is a binary operation, left operand missing.");
+            error(previous(), "Is a binary operation, left operand missing.");
         }
 
         Expr expr = operand.get();
