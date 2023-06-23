@@ -64,7 +64,23 @@ class Parser {
     }
 
     private Expr expression() {
-        return ternary();
+        return assignment();
+    }
+
+    private Expr assignment() {
+        final Expr expr = ternary();
+
+        if (match(EQUAL)) {
+            final Token equals = previous();
+            final Expr value = assignment();
+            if (expr instanceof Expr.Variable name) {
+                return new Expr.Assign(name.name, value);
+            }
+
+            error(equals, "Invalid assignment target.");
+        }
+
+        return expr;
     }
 
     private Expr ternary() {
