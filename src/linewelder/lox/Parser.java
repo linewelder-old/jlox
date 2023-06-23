@@ -369,14 +369,11 @@ class Parser {
     }
 
     private void synchronize() {
+        advance();
         while(!isAtEnd()) {
-            if (peek().type == SEMICOLON) {
-                advance();
-                return;
-            }
-
+            if (previous().type == SEMICOLON) return;
             switch (peek().type) {
-                case CLASS, FUN, VAR, FOR, IF, WHILE, PRINT, RIGHT_BRACE, RETURN -> {
+                case CLASS, FUN, VAR, FOR, IF, WHILE, PRINT, RETURN -> {
                     return;
                 }
             }
