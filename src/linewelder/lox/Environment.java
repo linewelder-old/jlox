@@ -28,6 +28,10 @@ public class Environment {
         return ancestor(distance).values.get(name);
     }
 
+    void assignAt(int distance, Token name, Object value) {
+        ancestor(distance).values.put(name.lexeme, value);
+    }
+
     Environment ancestor(int distance) {
         Environment environment = this;
         for (int i = 0; i < distance; i++) {
