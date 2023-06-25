@@ -3,8 +3,14 @@ package linewelder.lox;
 import java.util.*;
 
 public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
+    private enum FunctionType {
+        NONE,
+        FUNCTION
+    }
+
     private final Interpreter interpreter;
     private final Stack<Map<String, Boolean>> scopes = new Stack<>();
+    private FunctionType currentFunction = FunctionType.NONE;
 
     Resolver(Interpreter interpreter) {
         this.interpreter = interpreter;
@@ -52,6 +58,21 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         }
     }
 
+    private void resolveFunction(Expr.Function function, FunctionType type) {
+        final FunctionType enclosingFunction = currentFunction;
+        currentFunction = type;
+
+        beginScope();
+        for (final Token param : function.params) {
+            declare(param);
+            define(param);
+        }
+        resolve(function.body);
+        endScope();
+
+        currentFunction = enclosingFunction;
+    }
+
     @Override
     public Void visitAssignExpr(Expr.Assign expr) {
         resolve(expr.value);
@@ -77,13 +98,7 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitFunctionExpr(Expr.Function expr) {
-        beginScope();
-        for (final Token param : expr.params) {
-            declare(param);
-            define(param);
-        }
-        resolve(expr.body);
-        endScope();
+        resolveFunction(expr, FunctionType.FUNCTION);
         return null;
     }
 
@@ -168,6 +183,10 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitReturnStmt(Stmt.Return stmt) {
+        if (currentFunction == FunctionType.NONE) {
+            Lox.error(stmt.keyword, "Can't return from top-level code.");
+        }
+
         if (stmt.value != null) {
             resolve(stmt.value);
         }
