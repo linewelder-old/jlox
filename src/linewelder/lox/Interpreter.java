@@ -192,6 +192,11 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Object visitFunctionExpr(Expr.Function expr) {
+        return new LoxFunction(new Stmt.Function(null, expr.params, expr.body));
+    }
+
+    @Override
     public Object visitGroupingExpr(Expr.Grouping expr) {
         return evaluate(expr.expression);
     }

@@ -26,7 +26,10 @@ class Parser {
 
     private Stmt declaration(boolean replPrompt) {
         try {
-            if (match(FUN)) return function("function");
+            if (check(FUN) && peekNext().type != LEFT_PAREN) {
+                advance();
+                return function("function");
+            }
             if (match(VAR)) return varDeclaration();
             return statement(replPrompt);
         } catch (ParseError error) {
@@ -159,7 +162,12 @@ class Parser {
 
     private Stmt.Function function(String kind) {
         final Token name = consume(IDENTIFIER, "Expect " + kind + " name.");
-        consume(LEFT_PAREN, "Expect '(' after " + kind + " name.");
+        final Expr.Function function = anonymousFunction(kind);
+        return new Stmt.Function(name, function.params, function.body);
+    }
+
+    private Expr.Function anonymousFunction(String kind) {
+        consume(LEFT_PAREN, "Expect '(' before " + kind + " parameters.");
         final List<Token> parameters = new ArrayList<>();
         if (!check(RIGHT_PAREN)) {
             do {
@@ -174,7 +182,7 @@ class Parser {
 
         consume(LEFT_BRACE, "Expect '{' before " + kind + " body.");
         final List<Stmt> body = block();
-        return new Stmt.Function(name, parameters, body);
+        return new Expr.Function(parameters, body);
     }
 
     private List<Stmt> block() {
@@ -334,6 +342,10 @@ class Parser {
             return new Expr.Grouping(expr);
         }
 
+        if (match(FUN)) {
+            return anonymousFunction("anonymous function");
+        }
+
         throw error(peek(), "Expect expression.");
     }
 
@@ -371,6 +383,11 @@ class Parser {
         return tokens.get(current);
     }
 
+    private Token peekNext() {
+        if (tokens.size() < current + 2) return tokens.get(tokens.size() - 1);
+        return tokens.get(current + 1);
+    }
+
     private Token previous() {
         return tokens.get(current - 1);
     }
@@ -385,8 +402,11 @@ class Parser {
         while(!isAtEnd()) {
             if (previous().type == SEMICOLON) return;
             switch (peek().type) {
-                case CLASS, FUN, VAR, FOR, IF, WHILE, PRINT, RETURN -> {
+                case CLASS, VAR, FOR, IF, WHILE, PRINT, RETURN -> {
                     return;
+                }
+                case FUN -> {
+                    if (peekNext().type == IDENTIFIER) return;
                 }
             }
 
