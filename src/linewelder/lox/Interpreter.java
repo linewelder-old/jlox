@@ -70,7 +70,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitFunctionStmt(Stmt.Function stmt) {
-        final LoxFunction function = new LoxFunction(stmt);
+        final LoxFunction function = new LoxFunction(stmt.name, stmt.function);
         environment.define(stmt.name.lexeme, function);
         return null;
     }
@@ -193,7 +193,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     @Override
     public Object visitFunctionExpr(Expr.Function expr) {
-        return new LoxFunction(new Stmt.Function(null, expr.params, expr.body));
+        return new LoxFunction(expr);
     }
 
     @Override

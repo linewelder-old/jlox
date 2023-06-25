@@ -163,7 +163,7 @@ class Parser {
     private Stmt.Function function(String kind) {
         final Token name = consume(IDENTIFIER, "Expect " + kind + " name.");
         final Expr.Function function = anonymousFunction(kind);
-        return new Stmt.Function(name, function.params, function.body);
+        return new Stmt.Function(name, function);
     }
 
     private Expr.Function anonymousFunction(String kind) {

@@ -3,26 +3,32 @@ package linewelder.lox;
 import java.util.List;
 
 public class LoxFunction implements LoxCallable {
-    private final Stmt.Function declaration;
+    private final Token name;
+    private final Expr.Function function;
 
-    LoxFunction(Stmt.Function declaration) {
-        this.declaration = declaration;
+    LoxFunction(Token name, Expr.Function function) {
+        this.name = name;
+        this.function = function;
+    }
+
+    LoxFunction(Expr.Function function) {
+        this(null, function);
     }
 
     @Override
     public int arity() {
-        return declaration.params.size();
+        return function.params.size();
     }
 
     @Override
     public Object call(Interpreter interpreter, List<Object> arguments) {
         final Environment environment = new Environment(interpreter.globals);
-        for (int i = 0; i < declaration.params.size(); i++) {
-            environment.define(declaration.params.get(i).lexeme, arguments.get(i));
+        for (int i = 0; i < function.params.size(); i++) {
+            environment.define(function.params.get(i).lexeme, arguments.get(i));
         }
 
         try {
-            interpreter.executeBlock(declaration.body, environment);
+            interpreter.executeBlock(function.body, environment);
         } catch (Return returnValue) {
             return returnValue.value;
         }
@@ -31,8 +37,8 @@ public class LoxFunction implements LoxCallable {
 
     @Override
     public String toString() {
-        if (declaration.name != null) {
-            return "<fn " + declaration.name.lexeme + ">";
+        if (name != null) {
+            return "<fn " + name.lexeme + ">";
         } else {
             return "<anonymous fn>";
         }
