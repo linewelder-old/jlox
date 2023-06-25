@@ -11,6 +11,7 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     private final Interpreter interpreter;
     private final Stack<Map<String, Boolean>> scopes = new Stack<>();
     private FunctionType currentFunction = FunctionType.NONE;
+    private boolean isInLoop = false;
 
     Resolver(Interpreter interpreter) {
         this.interpreter = interpreter;
@@ -150,6 +151,7 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitBreakStmt(Stmt.Break stmt) {
+        if (!isInLoop) Lox.error(stmt.token, "Break outside a loop.");
         return null;
     }
 
@@ -215,7 +217,12 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     @Override
     public Void visitWhileStmt(Stmt.While stmt) {
         resolve(stmt.condition);
+
+        final boolean wasInLoop = isInLoop;
+        isInLoop = true;
         resolve(stmt.body);
+        isInLoop = wasInLoop;
+
         return null;
     }
 }
