@@ -7,10 +7,17 @@ public class LoxFunction implements LoxCallable {
     private final Expr.Function function;
     private final Environment closure;
 
-    LoxFunction(Token name, Expr.Function function, Environment closure) {
+    private final boolean isInitializer;
+
+    LoxFunction(Token name, Expr.Function function, Environment closure, boolean isInitializer) {
+        this.isInitializer = isInitializer;
         this.name = name;
         this.function = function;
         this.closure = closure;
+    }
+
+    LoxFunction(Token name, Expr.Function function, Environment closure) {
+        this(name, function, closure, false);
     }
 
     LoxFunction(Expr.Function function, Environment closure) {
@@ -20,7 +27,7 @@ public class LoxFunction implements LoxCallable {
     LoxFunction bind(LoxInstance instance) {
         final Environment environment = new Environment(closure);
         environment.define("this", instance);
-        return new LoxFunction(name, function, environment);
+        return new LoxFunction(name, function, environment, isInitializer);
     }
 
     @Override
@@ -35,12 +42,15 @@ public class LoxFunction implements LoxCallable {
             environment.define(function.params.get(i).lexeme, arguments.get(i));
         }
 
+        Object result = null;
         try {
             interpreter.executeBlock(function.body, environment);
         } catch (Return returnValue) {
-            return returnValue.value;
+            result = returnValue.value;
         }
-        return null;
+
+        if (isInitializer) result = closure.getAt(0, "this");
+        return result;
     }
 
     @Override
