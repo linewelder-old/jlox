@@ -157,6 +157,12 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Void visitThisExpr(Expr.This expr) {
+        resolveLocal(expr, expr.keyword);
+        return null;
+    }
+
+    @Override
     public Void visitUnaryExpr(Expr.Unary expr) {
         resolve(expr.right);
         return null;
@@ -202,11 +208,18 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         declare(stmt.name);
         define(stmt.name);
 
+        beginScope();
+        final LocalVariable this_ = new LocalVariable(null);
+        this_.defined = true;
+        this_.used = true;
+        scopes.peek().put("this", this_);
+
         for (final Stmt.Function method : stmt.methods) {
             final FunctionType declaration = FunctionType.METHOD;
             resolveFunction(method.function, declaration);
         }
 
+        endScope();
         return null;
     }
 
