@@ -71,7 +71,7 @@ The interpreter supports features that were suggested to be added in the Challen
     ```javascript
     var hello = fun() {
         print "Hello";
-    }
+    };
     hello(); // Prints "Hello".
     ```
 
