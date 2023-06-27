@@ -229,17 +229,8 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         this_.used = true;
         scopes.peek().put("this", this_);
 
-        for (final Stmt.Function method : stmt.methods) {
-            FunctionType declaration = FunctionType.METHOD;
-            if (method.name.lexeme.equals("init")) {
-                declaration = FunctionType.INITIALIZER;
-            }
-
-            resolveFunction(method.function, declaration);
-        }
-
-        for (final Stmt.Function classMethod : stmt.classMethods) {
-            resolveFunction(classMethod.function, FunctionType.METHOD);
+        for (final Stmt.Method method : stmt.methods) {
+            resolve(method);
         }
 
         endScope();
@@ -267,6 +258,17 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         resolve(stmt.condition);
         resolve(stmt.thenBranch);
         if (stmt.elseBranch != null) resolve(stmt.elseBranch);
+        return null;
+    }
+
+    @Override
+    public Void visitMethodStmt(Stmt.Method stmt) {
+        FunctionType declaration = FunctionType.METHOD;
+        if (!stmt.isClass && stmt.name.lexeme.equals("init")) {
+            declaration = FunctionType.INITIALIZER;
+        }
+
+        resolveFunction(stmt.function, declaration);
         return null;
     }
 

@@ -29,7 +29,7 @@ class Parser {
             if (match(CLASS)) return classDeclaration();
             if (check(FUN) && peekNext().type != LEFT_PAREN) {
                 advance();
-                return function("function");
+                return function();
             }
             if (match(VAR)) return varDeclaration();
             return statement(replPrompt);
@@ -43,18 +43,26 @@ class Parser {
         final Token name = consume(IDENTIFIER, "Expect class name.");
         consume(LEFT_BRACE, "Expect '{' before class body.");
 
-        final List<Stmt.Function> methods = new ArrayList<>();
-        final List<Stmt.Function> classMethods = new ArrayList<>();
+        final List<Stmt.Method> methods = new ArrayList<>();
         while (!check(RIGHT_BRACE) && !isAtEnd()) {
-            if (match(CLASS)) {
-                classMethods.add(function("class method"));
-            } else {
-                methods.add(function("method"));
-            }
+            final boolean isClass = match(CLASS);
+            methods.add(method(isClass));
         }
 
         consume(RIGHT_BRACE, "Expect '}' after class body.");
-        return new Stmt.Class(name, methods, classMethods);
+        return new Stmt.Class(name, methods);
+    }
+
+    private Stmt.Method method(boolean isClass) {
+        final String kind = isClass ? "class method" : "method";
+
+        final Token name = consume(IDENTIFIER, "Expect " + kind + " name.");
+        consume(LEFT_PAREN, "Expect '(' before " + kind + " parameters.");
+        final List<Token> parameters = parameterList();
+
+        consume(LEFT_BRACE, "Expect '{' before " + kind + " body.");
+        final List<Stmt> body = block();
+        return new Stmt.Method(name, new Expr.Function(parameters, body), isClass);
     }
 
     private Stmt varDeclaration() {
@@ -187,14 +195,22 @@ class Parser {
         throw error(peek(), "Unexpected token after expression.");
     }
 
-    private Stmt.Function function(String kind) {
-        final Token name = consume(IDENTIFIER, "Expect " + kind + " name.");
-        final Expr.Function function = anonymousFunction(kind);
+    private Stmt.Function function() {
+        final Token name = consume(IDENTIFIER, "Expect function name.");
+        final Expr.Function function = anonymousFunction("function");
         return new Stmt.Function(name, function);
     }
 
     private Expr.Function anonymousFunction(String kind) {
         consume(LEFT_PAREN, "Expect '(' before " + kind + " parameters.");
+        final List<Token> parameters = parameterList();
+
+        consume(LEFT_BRACE, "Expect '{' before " + kind + " body.");
+        final List<Stmt> body = block();
+        return new Expr.Function(parameters, body);
+    }
+
+    private List<Token> parameterList() {
         final List<Token> parameters = new ArrayList<>();
         if (!check(RIGHT_PAREN)) {
             do {
@@ -205,11 +221,9 @@ class Parser {
                 parameters.add(consume(IDENTIFIER, "Expect parameter name."));
             } while (match(COMMA));
         }
-        consume(RIGHT_PAREN, "Expect ')' after parameters.");
 
-        consume(LEFT_BRACE, "Expect '{' before " + kind + " body.");
-        final List<Stmt> body = block();
-        return new Expr.Function(parameters, body);
+        consume(RIGHT_PAREN, "Expect ')' after parameters.");
+        return parameters;
     }
 
     private List<Stmt> block() {

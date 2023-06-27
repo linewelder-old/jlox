@@ -79,17 +79,16 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         environment.define(stmt.name.lexeme, null);
 
         final Map<String, LoxFunction> methods = new HashMap<>();
-        for (final Stmt.Function method : stmt.methods) {
-            final boolean isInitializer = method.name.lexeme.equals("init");
-            final LoxFunction function = new LoxFunction(method.name, method.function, environment, isInitializer);
-            methods.put(method.name.lexeme, function);
-        }
-
         final Map<String, LoxFunction> classMethods = new HashMap<>();
-        for (final Stmt.Function classMethod : stmt.classMethods) {
-            final LoxFunction function = new LoxFunction(
-                classMethod.name, classMethod.function, environment, false);
-            classMethods.put(classMethod.name.lexeme, function);
+        for (final Stmt.Method method : stmt.methods) {
+            final boolean isInitializer = !method.isClass && method.name.lexeme.equals("init");
+            final LoxFunction function = new LoxFunction(method.name, method.function, environment, isInitializer);
+
+            if (method.isClass) {
+                classMethods.put(method.name.lexeme, function);
+            } else {
+                methods.put(method.name.lexeme, function);
+            }
         }
 
         final LoxClass klass = new LoxClass(stmt.name.lexeme, methods, classMethods);
@@ -118,6 +117,11 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         } else if (stmt.elseBranch != null) {
             execute(stmt.elseBranch);
         }
+        return null;
+    }
+
+    @Override
+    public Void visitMethodStmt(Stmt.Method stmt) {
         return null;
     }
 
