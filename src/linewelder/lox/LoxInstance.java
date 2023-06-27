@@ -15,6 +15,10 @@ public class LoxInstance {
             return fields.get(name.lexeme);
         }
 
+        if (klass == null) {
+            return null;
+        }
+
         final LoxFunction method = klass.findMethod(name.lexeme);
         if (method != null) return method.bind(this);
 
@@ -28,6 +32,10 @@ public class LoxInstance {
 
     @Override
     public String toString() {
-        return "<" + klass.name + " instance>";
+        if (klass == null) {
+            return "<instance>";
+        } else {
+            return "<" + klass.name + " instance>";
+        }
     }
 }
