@@ -4,16 +4,24 @@ import java.util.*;
 
 public class LoxClass extends LoxInstance implements LoxCallable {
     final String name;
+    final LoxClass superclass;
     private final Map<String, LoxFunction> methods;
 
-    private LoxClass(String name, Map<String, LoxFunction> methods) {
+    private LoxClass(String name, LoxClass superclass, Map<String, LoxFunction> methods) {
         super(null);
+        this.superclass = superclass;
         this.name = name;
         this.methods = methods;
     }
 
-    LoxClass(String name, Map<String, LoxFunction> methods, Map<String, LoxFunction> classMethods) {
-        super(new LoxClass(name + " metaclass", classMethods));
+    LoxClass(String name, LoxClass superclass,
+             Map<String, LoxFunction> methods, Map<String, LoxFunction> classMethods) {
+        super(new LoxClass(
+            name + " metaclass",
+            superclass == null ? null : superclass.klass,
+            classMethods
+        ));
+        this.superclass = superclass;
         this.name = name;
         this.methods = methods;
     }

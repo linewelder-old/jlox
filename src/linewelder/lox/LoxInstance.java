@@ -3,7 +3,7 @@ package linewelder.lox;
 import java.util.*;
 
 public class LoxInstance {
-    private final LoxClass klass;
+    final LoxClass klass;
     private final Map<String, Object> fields = new HashMap<>();
 
     LoxInstance(LoxClass klass) {
