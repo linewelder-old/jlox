@@ -31,6 +31,10 @@ public class LoxClass extends LoxInstance implements LoxCallable {
             return methods.get(name);
         }
 
+        if (superclass != null) {
+            return superclass.findMethod(name);
+        }
+
         return null;
     }
 
