@@ -165,7 +165,8 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitSuperExpr(Expr.Super expr) {
-        throw new UnsupportedOperationException();
+        resolveLocal(expr, expr.keyword);
+        return null;
     }
 
     @Override
@@ -235,6 +236,14 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         final ClassType enclosingClass = currentClass;
         currentClass = ClassType.CLASS;
 
+        if (stmt.superclass != null) {
+            beginScope();
+            final LocalVariable super_ = new LocalVariable(null);
+            super_.defined = true;
+            super_.used = true;
+            scopes.peek().put("super", super_);
+        }
+
         beginScope();
         final LocalVariable this_ = new LocalVariable(null);
         this_.defined = true;
@@ -246,6 +255,8 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         }
 
         endScope();
+        if (stmt.superclass != null) endScope();
+
         currentClass = enclosingClass;
         return null;
     }
